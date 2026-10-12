@@ -1,0 +1,9 @@
+  - name: Generate Automatic GitHub Release
+      uses: ncipollo/release-action@v1
+      with:
+        # The asterisk (*) forces GitHub to look for any APK file inside that output folder
+        artifacts: "build/app/outputs/flutter-apk/*.apk"
+        tag: "v1.0.${{ github.run_number }}"
+        name: "Production Release v1.0.${{ github.run_number }}"
+        allowUpdates: true
+        token: ${{ secrets.GITHUB_TOKEN }}
