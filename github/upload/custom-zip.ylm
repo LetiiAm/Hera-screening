@@ -1,0 +1,5 @@
+- name: Upload Custom Zip and Tarball
+  run: |
+    gh release upload ${{ github.event.release.tag_name }} ./path/my-build.zip ./path/my-build.tar.gz
+  env:
+    GITHUB_TOKEN: ${{ github.token }}
