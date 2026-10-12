@@ -1,0 +1,58 @@
+name: Flutter & Android Native CI
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: # Allows you to trigger it manually
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      # 1. Fetch code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Set up Java Environment
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # 3. Setup Flutter Environment
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      # 4. Install native compilation tools (Required for SQLCipher / Native C builds)
+      - name: Install Native Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential tcl
+
+      # 5. Get Flutter packages
+      - name: Install Dependencies
+        run: flutter pub get
+
+      # 6. Build the Android Release APK
+      # Compiles your Dart code, packages the native Camera APIs, and links SQLCipher binaries
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      # 7. Push to GitHub Releases
+      - name: Upload to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: prod-v${{ github.run_number }}
+          name: "Release Build v${{ github.run_number }}"
+          draft: false
+          prerelease: false
+          files: build/app/outputs/flutter-apk/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
