@@ -1,0 +1,24 @@
+name: nutrition_camera_app
+description: Full nutrition assessment UI with camera preview + form fields
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  camera: ^0.11.0
+  http: ^0.13.6
+  permission_handler: ^10.4.0
+  path_provider: ^2.0.15
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
