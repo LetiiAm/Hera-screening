@@ -1,0 +1,63 @@
+name: Flutter Android Production Release
+
+on:
+  push:
+    branches: [ "main" ] # Runs automatically when you push to the main branch
+  workflow_dispatch: # Allows you to trigger it manually via the Actions tab
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    # Required to allow the runner to publish to your Releases tab
+    permissions:
+      contents: write
+
+    steps:
+      # 1. Pull the source code from your repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Setup the Java environment (Required for Android Gradle builds)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # 3. Setup the Flutter Environment
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      # 4. Install native compilation tools (Required for SQLCipher / C-libraries)
+      - name: Install Native Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential tcl
+
+      # 5. Fetch Flutter dependencies
+      - name: Install Dependencies
+        run: flutter pub get
+
+      # 6. Compile the application into an APK
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      # 7. Scan the build folder, capture the APK, and create the GitHub Release
+      - name: Generate Automatic GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          # The double asterisk scans all subfolders to find any generated APK file
+          artifacts: "build/app/outputs/**/*.apk"
+          tag: "v1.0.${{ github.run_number }}"
+          name: "Production Release v1.0.${{ github.run_number }}"
+          body: |
+            ### Automated Production Build
+            - Encrypted SQLite Storage (SQLCipher) compiled successfully.
+            - Native Camera Integration bundled.
+            - Offline-first SMS sync with data compression ready.
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
